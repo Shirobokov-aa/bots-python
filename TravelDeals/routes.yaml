@@ -1,0 +1,19 @@
+# Whitelist направлений для фонового воркера (IATA)
+origins:
+  - MOW
+  - LED
+
+destinations:
+  - AYT  # Анталья
+  - IST  # Стамбул
+  - DXB  # Дубай
+  - BKK  # Бангкок
+  - AER  # Сочи
+  - HKT  # Пхукет
+  - EVN  # Ереван
+  - BUS  # Батуми
+
+# Порог «горячести»: пост в канал если цена <= max_price_rub (null = без лимита, берём топ)
+flight_max_price_rub: 15000
+hotel_max_price_pn_rub: 8000
+max_posts_per_tick: 3
