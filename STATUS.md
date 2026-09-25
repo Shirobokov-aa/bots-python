@@ -16,6 +16,7 @@
 
 ## Сделано
 ### 2026-09-25
+- **Док деплоя.** `docs/deploy.md` — шаблон выката ботов на antru по образцу ChannelMirror. → commit: `docs(deploy): vps bot deploy guide`
 - **GHA автодеплой.** Secrets `SSH_*` + path-filter workflow; rerun success. → commit: `ci(channelmirror): fix scp exclude syntax`
 - **ChannelMirror на antru.** `/opt/bots/channelmirror`, compose up, Telethon + polling ок; локальный процесс остановлен. → commit: `chore(channelmirror): docker compose and vps deploy`
 - **План AiGateway.** Отдельный сервис filter/rewrite над OpenRouter free для всех ботов. → commit: `docs(aigateway): plan gateway service`

@@ -23,6 +23,7 @@ bots-python/
 | [`docs/business-plan.md`](docs/business-plan.md) | Живой план работ |
 | [`docs/ideals.md`](docs/ideals.md) | Банк сырых идей |
 | [`docs/product-marketing.md`](docs/product-marketing.md) | Маркетинг-контекст |
+| [`docs/deploy.md`](docs/deploy.md) | Деплой ботов на antru (GHA + Docker) |
 | [`STATUS.md`](STATUS.md) | Что в работе / очередь / сделано |
 
 Статус конкретного бота: `<Bot>/STATUS.md`.
