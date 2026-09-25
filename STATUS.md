@@ -6,7 +6,6 @@
 - [ ] AiGateway: согласовать план (`AiGateway/PLAN.md`), потом MVP. → commit: `docs(aigateway): plan gateway service`
 
 ## Очередь
-- [ ] GHA secrets `SSH_*` в `bots-python` + push workflow (автодеплой). → commit: `chore(channelmirror): docker compose and vps deploy`
 - [ ] #10 живой прогон: token + marker + канал. → commit: —
 - [ ] #8 SmartDigest: ИИ-выжимка в бот (главный гэп). → commit: `feat(smartdigest): ai digest to bot`
 - [ ] #8 позже: SQLite → PostgreSQL. → commit: `feat(smartdigest): migrate to postgresql`
@@ -17,6 +16,7 @@
 
 ## Сделано
 ### 2026-09-25
+- **GHA автодеплой.** Secrets `SSH_*` + path-filter workflow; rerun success. → commit: `ci(channelmirror): fix scp exclude syntax`
 - **ChannelMirror на antru.** `/opt/bots/channelmirror`, compose up, Telethon + polling ок; локальный процесс остановлен. → commit: `chore(channelmirror): docker compose and vps deploy`
 - **План AiGateway.** Отдельный сервис filter/rewrite над OpenRouter free для всех ботов. → commit: `docs(aigateway): plan gateway service`
 ### 2026-09-24

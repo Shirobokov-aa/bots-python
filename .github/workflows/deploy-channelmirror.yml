@@ -26,12 +26,12 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "ChannelMirror/"
+          # .env / data не в git — на сервере не затираются (rm: false)
+          source: "ChannelMirror/,!ChannelMirror/.venv,!ChannelMirror/data,!ChannelMirror/tests,!ChannelMirror/STATUS.md,!ChannelMirror/README.md"
           target: /opt/bots/channelmirror
           strip_components: 1
           overwrite: true
           rm: false
-          exclude: ".venv,venv,__pycache__,.pytest_cache,.git,data,.env,.env.*,*.db,*.session,telethon_qr.png,STATUS.md,README.md,tests"
 
       - name: Build and restart
         uses: appleboy/ssh-action@v1.2.2
@@ -39,7 +39,6 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script_stop: true
           command_timeout: 15m
           script: |
             set -euo pipefail

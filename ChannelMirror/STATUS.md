@@ -3,13 +3,13 @@
 ## В работе
 
 ## Очередь
-- [ ] GHA secrets + push → автодеплой path-filter. → commit: `chore(channelmirror): docker compose and vps deploy`
 - [ ] TODO(ai): фильтр рекламы/мусора перед очередью. → commit: `feat(channelmirror): ai filter`
 - [ ] TODO(ai): рерайт текста. → commit: `feat(channelmirror): ai rewrite`
 - [ ] Режим forward с атрибуцией (опция). → commit: `feat(channelmirror): forward mode`
 
 ## Сделано
 ### 2026-09-25
+- **GHA автодеплой.** Secrets + path workflow; бот уже постит с VPS. → commit: `ci(channelmirror): fix scp exclude syntax`
 - **На antru.** `/opt/bots/channelmirror`, Docker, `.env`+sqlite с Mac; Telethon join + polling `@shiro_test_bot`. → commit: `chore(channelmirror): docker compose and vps deploy`
 - **Fix gif + watchlist commit.** Telethon `.gif` вместо `.animation`; commit до `refresh_watchlist` (приватный Rose Signal не попадал). → commit: `fix(channelmirror): gif serialize and watchlist commit`
 - **Приватные источники.** Кнопка «Приватный источник»: forward или `t.me/+` инвайт; матч по chat_id. → commit: `feat(channelmirror): private sources`
