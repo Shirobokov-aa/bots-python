@@ -24,25 +24,25 @@ def _file(path: str, name: str | None = None) -> BufferedInputFile:
 
 
 async def publish_silent(bot: Bot, chat_id: int, payload: dict[str, Any]) -> None:
-    """Post content as original (no forward / no source link header).
-
-    # TODO(ai): transform_payload already applied upstream; optional second pass here
-    """
+    """Post content as original (no forward). Optional plain-text source footer in payload."""
     kind = payload.get("type") or "text"
     text = payload.get("text") or ""
-    # Never attach source attribution in MVP (user request: без ссылок на источники)
-    # TODO(ai): optional "via @source" footer toggle
+    followup = payload.get("_source_followup")
 
     if kind == "text":
-        await bot.send_message(chat_id, text or "…", disable_web_page_preview=False)
+        await bot.send_message(chat_id, text or "…", disable_web_page_preview=True)
         return
 
     if kind == "photo":
         await bot.send_photo(chat_id, _file(payload["path"]), caption=text or None)
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     if kind == "video":
         await bot.send_video(chat_id, _file(payload["path"]), caption=text or None)
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     if kind == "document":
@@ -51,26 +51,38 @@ async def publish_silent(bot: Bot, chat_id: int, payload: dict[str, Any]) -> Non
             _file(payload["path"], payload.get("file_name")),
             caption=text or None,
         )
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     if kind == "audio":
         await bot.send_audio(chat_id, _file(payload["path"]), caption=text or None)
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     if kind == "voice":
         await bot.send_voice(chat_id, _file(payload["path"]), caption=text or None)
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     if kind == "animation":
         await bot.send_animation(chat_id, _file(payload["path"]), caption=text or None)
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     if kind == "sticker":
         await bot.send_sticker(chat_id, _file(payload["path"], "sticker.webp"))
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     if kind == "video_note":
         await bot.send_video_note(chat_id, _file(payload["path"]))
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     if kind == "album":
@@ -100,11 +112,17 @@ async def publish_silent(bot: Bot, chat_id: int, payload: dict[str, Any]) -> Non
             is_anonymous=payload.get("is_anonymous", True),
             allows_multiple_answers=payload.get("allows_multiple", False),
         )
+        if followup:
+            await bot.send_message(chat_id, followup, disable_web_page_preview=True)
         return
 
     # Fallback: text dump
     log.warning("unknown payload type %s, fallback text", kind)
-    await bot.send_message(chat_id, text or json.dumps(payload, ensure_ascii=False)[:3500])
+    await bot.send_message(
+        chat_id,
+        text or json.dumps(payload, ensure_ascii=False)[:3500],
+        disable_web_page_preview=True,
+    )
 
 
 async def safe_publish(bot: Bot, chat_id: int, payload: dict[str, Any]) -> str | None:

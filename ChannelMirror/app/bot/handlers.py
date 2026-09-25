@@ -8,7 +8,7 @@ from aiogram.types import CallbackQuery, ChatMemberAdministrator, ChatMemberOwne
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.bot import texts
-from app.bot.keyboards import dest_pick_kb, main_kb
+from app.bot.keyboards import dest_pick_kb, main_kb, source_label_kb
 from app.config import get_settings
 from app.db.models import User
 from app.services.parse_source import parse_channel, parse_invite, private_source_slug
@@ -23,6 +23,7 @@ from app.services.routes import (
     list_routes,
     list_sources,
     toggle_route,
+    toggle_source_label,
 )
 from app.services.telethon_listener import get_listener
 
@@ -33,11 +34,13 @@ NAV_BUTTONS = {"Цели", "Источники", "Маршруты", "Помощ
 
 class AddSource(StatesGroup):
     waiting_dest = State()
+    waiting_source_label = State()
 
 
 class AddPrivateSource(StatesGroup):
     waiting_bind = State()
     waiting_dest = State()
+    waiting_source_label = State()
 
 
 def _is_admin(telegram_id: int) -> bool:
@@ -191,6 +194,27 @@ async def cmd_toggle_route(
     await message.answer(f"Маршрут #{route.id}: {'on' if route.is_active else 'off'}")
 
 
+@router.message(Command("toggle_source"))
+async def cmd_toggle_source(
+    message: Message,
+    command: CommandObject,
+    session: AsyncSession,
+    db_user: User,
+) -> None:
+    if await _deny_if_needed(message, db_user):
+        return
+    if not command.args or not command.args.strip().isdigit():
+        await message.answer("Формат: /toggle_source 3")
+        return
+    route = await toggle_source_label(session, db_user.id, int(command.args.strip()))
+    await session.commit()
+    if route is None:
+        await message.answer("Не найден.")
+        return
+    mode = "с источником" if route.show_source_label else "без источника (silent)"
+    await message.answer(f"Маршрут #{route.id}: {mode}\n{texts.route_line(route)}")
+
+
 @router.message(Command("interval"))
 async def cmd_interval(
     message: Message,
@@ -310,6 +334,47 @@ async def on_pick_dest(callback: CallbackQuery, state: FSMContext, session: Asyn
     if dest is None:
         await callback.answer("Цель не найдена", show_alert=True)
         return
+    if not data.get("source_username") and data.get("source_chat_id") is None:
+        await state.clear()
+        await callback.answer("Сессия сброшена, начни снова", show_alert=True)
+        return
+
+    await state.update_data(dest_id=dest.id)
+    current = await state.get_state()
+    if current == AddPrivateSource.waiting_dest.state:
+        await state.set_state(AddPrivateSource.waiting_source_label)
+    else:
+        await state.set_state(AddSource.waiting_source_label)
+    await callback.message.edit_text(texts.SOURCE_LABEL_ASK, reply_markup=source_label_kb())
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("src_label:"))
+async def on_source_label(callback: CallbackQuery, state: FSMContext, session: AsyncSession, db_user: User) -> None:
+    if not _is_admin(db_user.telegram_id):
+        await callback.answer("Нет доступа", show_alert=True)
+        return
+    raw = (callback.data or "").split(":", 1)[-1]
+    if raw == "cancel":
+        await state.clear()
+        await callback.message.edit_text("Отменил.")
+        await callback.answer()
+        return
+    if raw not in {"0", "1"}:
+        await callback.answer("bad")
+        return
+
+    data = await state.get_data()
+    dest_id = data.get("dest_id")
+    if dest_id is None:
+        await state.clear()
+        await callback.answer("Сессия сброшена, начни снова", show_alert=True)
+        return
+    dest = await get_destination(session, db_user.id, int(dest_id))
+    if dest is None:
+        await state.clear()
+        await callback.answer("Цель не найдена", show_alert=True)
+        return
 
     chat_id = data.get("source_chat_id")
     username = data.get("source_username")
@@ -329,11 +394,22 @@ async def on_pick_dest(callback: CallbackQuery, state: FSMContext, session: Asyn
         await callback.answer("Сессия сброшена, начни снова", show_alert=True)
         return
 
-    route = await add_route(session, db_user.id, source.id, dest.id)
+    show_label = raw == "1"
+    route = await add_route(
+        session,
+        db_user.id,
+        source.id,
+        dest.id,
+        show_source_label=show_label,
+    )
     await session.commit()
+    # reload with relations for route_line
+    routes = await list_routes(session, db_user.id)
+    route = next((r for r in routes if r.id == route.id), route)
     await state.clear()
     await get_listener().refresh_watchlist()
-    await callback.message.edit_text(f"Маршрут готов:\n{texts.route_line(route)}")
+    mode = "с источником" if show_label else "без источника"
+    await callback.message.edit_text(f"Маршрут готов ({mode}):\n{texts.route_line(route)}")
     await callback.answer()
 
 

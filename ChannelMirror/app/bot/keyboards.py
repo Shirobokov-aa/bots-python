@@ -24,3 +24,14 @@ def dest_pick_kb(destinations: list) -> InlineKeyboardMarkup:
     ]
     rows.append([InlineKeyboardButton(text="Отмена", callback_data="pick_dest:cancel")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def source_label_kb() -> InlineKeyboardMarkup:
+    """Optional plain-text attribution: Источник: \"Title\"."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="С источником", callback_data="src_label:1")],
+            [InlineKeyboardButton(text="Без источника", callback_data="src_label:0")],
+            [InlineKeyboardButton(text="Отмена", callback_data="src_label:cancel")],
+        ]
+    )

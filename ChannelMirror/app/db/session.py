@@ -33,4 +33,11 @@ async def init_db() -> None:
             if "chat_id" not in cols:
                 sync_conn.execute(text("ALTER TABLE sources ADD COLUMN chat_id BIGINT"))
 
+            route_rows = sync_conn.execute(text("PRAGMA table_info(routes)")).fetchall()
+            route_cols = {r[1] for r in route_rows}
+            if "show_source_label" not in route_cols:
+                sync_conn.execute(
+                    text("ALTER TABLE routes ADD COLUMN show_source_label BOOLEAN DEFAULT 0")
+                )
+
         await conn.run_sync(_migrate)

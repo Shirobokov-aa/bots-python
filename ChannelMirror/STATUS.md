@@ -5,10 +5,10 @@
 ## Очередь
 - [ ] TODO(ai): фильтр рекламы/мусора перед очередью. → commit: `feat(channelmirror): ai filter`
 - [ ] TODO(ai): рерайт текста. → commit: `feat(channelmirror): ai rewrite`
-- [ ] Режим forward с атрибуцией (опция). → commit: `feat(channelmirror): forward mode`
 
 ## Сделано
 ### 2026-09-25
+- **Подпись Источник.** При создании маршрута кнопки «С источником» / «Без»; `/toggle_source ID`. В пост: `Источник: "Название"` — только текст, без ссылки. → commit: `feat(channelmirror): optional source label`
 - **GHA автодеплой.** Secrets + path workflow; бот уже постит с VPS. → commit: `ci(channelmirror): fix scp exclude syntax`
 - **На antru.** `/opt/bots/channelmirror`, Docker, `.env`+sqlite с Mac; Telethon join + polling `@shiro_test_bot`. → commit: `chore(channelmirror): docker compose and vps deploy`
 - **Fix gif + watchlist commit.** Telethon `.gif` вместо `.animation`; commit до `refresh_watchlist` (приватный Rose Signal не попадал). → commit: `fix(channelmirror): gif serialize and watchlist commit`
@@ -18,6 +18,6 @@
 - **Слушатель: join + chat_id.** Без подписки события не приходят; каналы без `@` (Finder.work) матч по peer id. → commit: `fix(channelmirror): join sources by chat id`
 - **Interval 0.** `/interval ID 0` = без паузы; min 60 снят. → commit: `fix(channelmirror): allow zero interval`
 - **QR рисуется в терминале + PNG.** Не открывать `tg://` на телефоне — сканить экраном. → commit: `fix(channelmirror): render telethon qr`
-- **QR Telethon login.** `scripts/telethon_login.py --qr` когда SMS/код не приходит. → commit: `fix(channelmirror): qr telethon login`
+- **QR Telethon login.** `scripts/telethon_login.py --qr` когда SMS/код не приходит. → commit: `feat(channelmirror): qr telethon login`
 - **MVP код.** Silent copy, маршруты, Telethon, очередь, `# TODO(ai)`. → commit: `feat(channelmirror): mvp silent copy queue`
 - **Лок продукта #11.** → commit: `docs(agreed): lock channelmirror`

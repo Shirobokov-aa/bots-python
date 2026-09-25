@@ -132,6 +132,7 @@ async def add_route(
     source_id: int,
     destination_id: int,
     interval_seconds: int | None = None,
+    show_source_label: bool | None = None,
 ) -> Route:
     result = await session.execute(
         select(Route).where(Route.source_id == source_id, Route.destination_id == destination_id)
@@ -143,12 +144,15 @@ async def add_route(
         existing.is_active = True
         if interval_seconds is not None:
             existing.interval_seconds = interval_seconds
+        if show_source_label is not None:
+            existing.show_source_label = show_source_label
         return existing
     route = Route(
         user_id=user_id,
         source_id=source_id,
         destination_id=destination_id,
         interval_seconds=interval_seconds or get_settings().post_interval_seconds,
+        show_source_label=bool(show_source_label) if show_source_label is not None else False,
     )
     session.add(route)
     await session.flush()
@@ -170,6 +174,19 @@ async def toggle_route(session: AsyncSession, user_id: int, route_id: int) -> Ro
     if route is None:
         return None
     route.is_active = not route.is_active
+    return route
+
+
+async def toggle_source_label(session: AsyncSession, user_id: int, route_id: int) -> Route | None:
+    result = await session.execute(
+        select(Route)
+        .where(Route.id == route_id, Route.user_id == user_id)
+        .options(selectinload(Route.source), selectinload(Route.destination))
+    )
+    route = result.scalar_one_or_none()
+    if route is None:
+        return None
+    route.show_source_label = not route.show_source_label
     return route
 
 

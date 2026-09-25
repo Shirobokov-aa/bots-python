@@ -47,3 +47,38 @@ def test_merge_album() -> None:
     assert album["type"] == "album"
     assert album["text"] == "hi"
     assert album["items"][0]["path"] == "a.jpg"
+
+
+def test_source_footer_plain_text() -> None:
+    from app.services.source_label import (
+        append_source_footer,
+        apply_source_label_to_payload,
+        format_source_footer,
+        source_display_name,
+    )
+
+    assert format_source_footer("Рога и копыта") == 'Источник: "Рога и копыта"'
+    assert append_source_footer("Привет", "Рога и копыта") == (
+        'Привет\n\nИсточник: "Рога и копыта"'
+    )
+    assert append_source_footer("", "X") == 'Источник: "X"'
+
+    class _Src:
+        title = "Рога и копыта"
+        username = "roga"
+
+    assert source_display_name(_Src()) == "Рога и копыта"
+
+    class _OnlyUname:
+        title = None
+        username = "roga_kopyta"
+
+    # no @ — must not become a Telegram mention/link
+    assert source_display_name(_OnlyUname()) == "roga_kopyta"
+    assert "@" not in format_source_footer(source_display_name(_OnlyUname()))
+
+    payload = apply_source_label_to_payload({"type": "text", "text": "hi"}, "Канал")
+    assert payload["text"].endswith('Источник: "Канал"')
+
+    sticker = apply_source_label_to_payload({"type": "sticker", "path": "a.webp"}, "Канал")
+    assert sticker.get("_source_followup") == 'Источник: "Канал"'

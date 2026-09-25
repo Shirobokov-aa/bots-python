@@ -83,7 +83,10 @@ async def next_pending_for_destination(
             Route.is_active.is_(True),
             QueueItem.status == "pending",
         )
-        .options(selectinload(QueueItem.route).selectinload(Route.destination))
+        .options(
+            selectinload(QueueItem.route).selectinload(Route.destination),
+            selectinload(QueueItem.route).selectinload(Route.source),
+        )
         .order_by(QueueItem.id)
         .limit(1)
     )

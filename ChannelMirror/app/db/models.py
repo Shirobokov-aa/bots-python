@@ -68,6 +68,8 @@ class Route(Base, TimestampMixin):
     destination_id: Mapped[int] = mapped_column(ForeignKey("destinations.id", ondelete="CASCADE"), index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     interval_seconds: Mapped[int] = mapped_column(Integer, default=5400)
+    # If True — append plain-text footer: Источник: "Channel Title" (no link).
+    show_source_label: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped[User] = relationship(back_populates="routes")
     source: Mapped[Source] = relationship(back_populates="routes")
