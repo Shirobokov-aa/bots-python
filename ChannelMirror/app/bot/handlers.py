@@ -11,11 +11,12 @@ from app.bot import texts
 from app.bot.keyboards import dest_pick_kb, main_kb
 from app.config import get_settings
 from app.db.models import User
-from app.services.parse_source import parse_channel
+from app.services.parse_source import parse_channel, parse_invite, private_source_slug
 from app.services.routes import (
     add_destination,
     add_route,
     add_source,
+    add_source_by_chat_id,
     delete_route,
     get_destination,
     list_destinations,
@@ -27,8 +28,15 @@ from app.services.telethon_listener import get_listener
 
 router = Router()
 
+NAV_BUTTONS = {"Цели", "Источники", "Маршруты", "Помощь", "Приватный источник"}
+
 
 class AddSource(StatesGroup):
+    waiting_dest = State()
+
+
+class AddPrivateSource(StatesGroup):
+    waiting_bind = State()
     waiting_dest = State()
 
 
@@ -46,6 +54,33 @@ async def _deny_if_needed(message: Message, db_user: User) -> bool:
     return True
 
 
+def _forward_channel(message: Message):
+    chat = message.forward_from_chat
+    if chat is not None and getattr(chat, "type", None) == "channel":
+        return chat
+    fo = getattr(message, "forward_origin", None)
+    if fo is not None and getattr(fo, "type", None) == "channel":
+        chat = getattr(fo, "chat", None)
+        if chat is not None and getattr(chat, "type", None) == "channel":
+            return chat
+    return None
+
+
+async def _ask_dest_for_pending(message: Message, state: FSMContext, session: AsyncSession, db_user: User) -> None:
+    dests = await list_destinations(session, db_user.id)
+    if not dests:
+        await state.clear()
+        await message.answer("Сначала добавь цель: перешли пост из своего канала.")
+        return
+    data = await state.get_data()
+    label = data.get("source_title") or data.get("source_username") or data.get("source_chat_id")
+    await state.set_state(AddPrivateSource.waiting_dest)
+    await message.answer(
+        f"Источник {label}. Куда публиковать?",
+        reply_markup=dest_pick_kb(dests),
+    )
+
+
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext, db_user: User) -> None:
     await state.clear()
@@ -59,13 +94,13 @@ async def cmd_start(message: Message, state: FSMContext, db_user: User) -> None:
 async def cmd_help(message: Message, db_user: User) -> None:
     if await _deny_if_needed(message, db_user):
         return
-    await message.answer(texts.HELP)
+    await message.answer(texts.HELP, reply_markup=main_kb())
 
 
 @router.message(Command("cancel"))
 async def cmd_cancel(message: Message, state: FSMContext) -> None:
     await state.clear()
-    await message.answer("Ок, отменил.")
+    await message.answer("Ок, отменил.", reply_markup=main_kb())
 
 
 @router.message(Command("dests"))
@@ -88,7 +123,9 @@ async def cmd_sources(message: Message, session: AsyncSession, db_user: User) ->
         return
     sources = await list_sources(session, db_user.id)
     if not sources:
-        await message.answer("Источников нет. Пришли @channel или https://t.me/channel")
+        await message.answer(
+            "Источников нет. Публичный: @channel. Приватный: кнопка «Приватный источник»."
+        )
         return
     lines = ["Источники:"] + [texts.source_line(s) for s in sources]
     await message.answer("\n".join(lines))
@@ -107,6 +144,14 @@ async def cmd_routes(message: Message, session: AsyncSession, db_user: User) -> 
     await message.answer("\n".join(lines))
 
 
+@router.message(F.text == "Приватный источник")
+async def cmd_private_source(message: Message, state: FSMContext, db_user: User) -> None:
+    if await _deny_if_needed(message, db_user):
+        return
+    await state.set_state(AddPrivateSource.waiting_bind)
+    await message.answer(texts.PRIVATE_SOURCE_HINT)
+
+
 @router.message(Command("del_route"))
 async def cmd_del_route(
     message: Message,
@@ -120,6 +165,7 @@ async def cmd_del_route(
         await message.answer("Формат: /del_route 3")
         return
     ok = await delete_route(session, db_user.id, int(command.args.strip()))
+    await session.commit()
     await get_listener().refresh_watchlist()
     await message.answer("Удалил." if ok else "Не найден.")
 
@@ -137,6 +183,7 @@ async def cmd_toggle_route(
         await message.answer("Формат: /toggle_route 3")
         return
     route = await toggle_route(session, db_user.id, int(command.args.strip()))
+    await session.commit()
     await get_listener().refresh_watchlist()
     if route is None:
         await message.answer("Не найден.")
@@ -158,8 +205,8 @@ async def cmd_interval(
         await message.answer("Формат: /interval ID СЕКУНДЫ  (напр. /interval 1 3600)")
         return
     route_id, seconds = int(parts[0]), int(parts[1])
-    if seconds < 60:
-        await message.answer("Минимум 60 секунд.")
+    if seconds < 0:
+        await message.answer("Секунды >= 0 (0 = без паузы, сразу).")
         return
     routes = await list_routes(session, db_user.id)
     route = next((r for r in routes if r.id == route_id), None)
@@ -167,19 +214,15 @@ async def cmd_interval(
         await message.answer("Не найден.")
         return
     route.interval_seconds = seconds
-    await message.answer(f"Маршрут #{route.id}: каждые {seconds}s")
+    label = "без паузы" if seconds == 0 else f"каждые {seconds}s"
+    await message.answer(f"Маршрут #{route.id}: {label}")
 
 
-async def _register_forwarded_channel(message: Message, bot: Bot, session: AsyncSession, db_user: User) -> bool:
+async def _register_forwarded_destination(message: Message, bot: Bot, session: AsyncSession, db_user: User) -> bool:
     """If message is forward from a channel and bot is admin there — register dest."""
-    chat = message.forward_from_chat
-    if chat is None or getattr(chat, "type", None) != "channel":
-        # aiogram 3.7+ MessageOriginChannel
-        fo = getattr(message, "forward_origin", None)
-        if fo is not None and getattr(fo, "type", None) == "channel":
-            chat = getattr(fo, "chat", None)
-        if chat is None or getattr(chat, "type", None) != "channel":
-            return False
+    chat = _forward_channel(message)
+    if chat is None:
+        return False
     me = await bot.get_me()
     try:
         member = await bot.get_chat_member(chat.id, me.id)
@@ -206,11 +249,44 @@ async def _register_forwarded_channel(message: Message, bot: Bot, session: Async
     return True
 
 
+async def _bind_private_from_forward(
+    message: Message,
+    state: FSMContext,
+    session: AsyncSession,
+    db_user: User,
+) -> bool:
+    chat = _forward_channel(message)
+    if chat is None:
+        return False
+    listener = get_listener()
+    resolved = await listener.resolve_chat(chat.id)
+    if resolved is None:
+        await message.answer(
+            "Telethon-аккаунт не видит этот канал.\n"
+            "Вступи им в канал или пришли инвайт https://t.me/+XXXX"
+        )
+        return True
+    peer_id, title, uname = resolved
+    await state.update_data(
+        source_chat_id=peer_id,
+        source_title=title or chat.title,
+        source_username=uname or private_source_slug(peer_id),
+    )
+    await _ask_dest_for_pending(message, state, session, db_user)
+    return True
+
+
 @router.message(F.forward_from_chat | F.forward_origin)
 async def on_forward(message: Message, bot: Bot, session: AsyncSession, db_user: User, state: FSMContext) -> None:
     if await _deny_if_needed(message, db_user):
         return
-    handled = await _register_forwarded_channel(message, bot, session, db_user)
+    current = await state.get_state()
+    if current == AddPrivateSource.waiting_bind.state:
+        handled = await _bind_private_from_forward(message, state, session, db_user)
+        if not handled:
+            await message.answer("Перешли пост из приватного канала-источника.")
+        return
+    handled = await _register_forwarded_destination(message, bot, session, db_user)
     if not handled:
         await message.answer("Перешли пост именно из канала-цели.")
 
@@ -230,22 +306,64 @@ async def on_pick_dest(callback: CallbackQuery, state: FSMContext, session: Asyn
         await callback.answer("bad id")
         return
     data = await state.get_data()
-    username = data.get("source_username")
-    if not username:
-        await state.clear()
-        await callback.answer("Сессия сброшена, пришли ссылку снова", show_alert=True)
-        return
     dest = await get_destination(session, db_user.id, int(raw))
     if dest is None:
         await callback.answer("Цель не найдена", show_alert=True)
         return
-    source = await add_source(session, db_user.id, username)
+
+    chat_id = data.get("source_chat_id")
+    username = data.get("source_username")
+    title = data.get("source_title")
+    if chat_id is not None:
+        source = await add_source_by_chat_id(
+            session,
+            db_user.id,
+            chat_id=int(chat_id),
+            title=title,
+            username=username,
+        )
+    elif username:
+        source = await add_source(session, db_user.id, username, title=title)
+    else:
+        await state.clear()
+        await callback.answer("Сессия сброшена, начни снова", show_alert=True)
+        return
+
     route = await add_route(session, db_user.id, source.id, dest.id)
+    await session.commit()
     await state.clear()
     await get_listener().refresh_watchlist()
-    # TODO(ai): optional per-route AI profile (filter/rewrite)
     await callback.message.edit_text(f"Маршрут готов:\n{texts.route_line(route)}")
     await callback.answer()
+
+
+@router.message(AddPrivateSource.waiting_bind, F.text)
+async def on_private_bind_text(
+    message: Message,
+    state: FSMContext,
+    session: AsyncSession,
+    db_user: User,
+) -> None:
+    if await _deny_if_needed(message, db_user):
+        return
+    if message.text in NAV_BUTTONS:
+        return
+    invite = parse_invite(message.text or "")
+    if invite is None:
+        await message.answer("Нужен forward из канала или инвайт https://t.me/+XXXX")
+        return
+    listener = get_listener()
+    try:
+        peer_id, title, uname = await listener.join_invite(invite.hash)
+    except Exception as exc:
+        await message.answer(f"Не смог вступить по инвайту: {exc}")
+        return
+    await state.update_data(
+        source_chat_id=peer_id,
+        source_title=title,
+        source_username=uname or private_source_slug(peer_id),
+    )
+    await _ask_dest_for_pending(message, state, session, db_user)
 
 
 @router.message(F.text)
@@ -257,18 +375,26 @@ async def on_text(
 ) -> None:
     if await _deny_if_needed(message, db_user):
         return
-    if message.text in {"Цели", "Источники", "Маршруты", "Помощь"}:
+    if message.text in NAV_BUTTONS:
+        return
+    # invite typed outside private flow → hint
+    invite = parse_invite(message.text or "")
+    if invite is not None:
+        await state.set_state(AddPrivateSource.waiting_bind)
+        await on_private_bind_text(message, state, session, db_user)
         return
     parsed = parse_channel(message.text or "")
     if parsed is None:
-        await message.answer("Не похоже на канал. Пример: @durov или https://t.me/durov")
+        await message.answer(
+            "Не похоже на канал. Пример: @durov или кнопка «Приватный источник»."
+        )
         return
     dests = await list_destinations(session, db_user.id)
     if not dests:
         await message.answer("Сначала добавь цель: перешли пост из своего канала.")
         return
     await state.set_state(AddSource.waiting_dest)
-    await state.update_data(source_username=parsed.username)
+    await state.update_data(source_username=parsed.username, source_chat_id=None, source_title=None)
     await message.answer(
         f"Источник {parsed.display}. Куда публиковать?",
         reply_markup=dest_pick_kb(dests),

@@ -5,6 +5,7 @@ def main_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="Цели"), KeyboardButton(text="Источники")],
+            [KeyboardButton(text="Приватный источник")],
             [KeyboardButton(text="Маршруты"), KeyboardButton(text="Помощь")],
         ],
         resize_keyboard=True,

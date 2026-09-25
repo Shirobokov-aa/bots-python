@@ -68,7 +68,13 @@ async def add_destination(
     return dest
 
 
-async def add_source(session: AsyncSession, user_id: int, username: str, title: str | None = None) -> Source:
+async def add_source(
+    session: AsyncSession,
+    user_id: int,
+    username: str,
+    title: str | None = None,
+    chat_id: int | None = None,
+) -> Source:
     uname = username.lower().lstrip("@")
     result = await session.execute(select(Source).where(Source.user_id == user_id, Source.username == uname))
     existing = result.scalar_one_or_none()
@@ -76,8 +82,45 @@ async def add_source(session: AsyncSession, user_id: int, username: str, title: 
         existing.is_active = True
         if title:
             existing.title = title
+        if chat_id is not None:
+            existing.chat_id = chat_id
         return existing
-    source = Source(user_id=user_id, username=uname, title=title)
+    source = Source(user_id=user_id, username=uname, title=title, chat_id=chat_id)
+    session.add(source)
+    await session.flush()
+    return source
+
+
+async def add_source_by_chat_id(
+    session: AsyncSession,
+    user_id: int,
+    chat_id: int,
+    title: str | None = None,
+    username: str | None = None,
+) -> Source:
+    """Private/public source keyed by Telegram peer id."""
+    result = await session.execute(
+        select(Source).where(Source.user_id == user_id, Source.chat_id == chat_id)
+    )
+    existing = result.scalar_one_or_none()
+    slug = (username or f"id{abs(int(chat_id))}").lower().lstrip("@")
+    if existing:
+        existing.is_active = True
+        if title:
+            existing.title = title
+        if username:
+            existing.username = slug
+        return existing
+    # also merge if same slug already exists without chat_id
+    by_name = await session.execute(select(Source).where(Source.user_id == user_id, Source.username == slug))
+    named = by_name.scalar_one_or_none()
+    if named:
+        named.is_active = True
+        named.chat_id = chat_id
+        if title:
+            named.title = title
+        return named
+    source = Source(user_id=user_id, username=slug, title=title, chat_id=chat_id)
     session.add(source)
     await session.flush()
     return source
@@ -130,13 +173,18 @@ async def toggle_route(session: AsyncSession, user_id: int, route_id: int) -> Ro
     return route
 
 
-async def active_source_usernames(session: AsyncSession) -> set[str]:
+async def active_sources(session: AsyncSession) -> list[Source]:
     result = await session.execute(
-        select(Source.username)
+        select(Source)
         .join(Route, Route.source_id == Source.id)
         .where(Source.is_active.is_(True), Route.is_active.is_(True))
+        .distinct()
     )
-    return {row[0] for row in result.all()}
+    return list(result.scalars().all())
+
+
+async def active_source_usernames(session: AsyncSession) -> set[str]:
+    return {s.username for s in await active_sources(session) if s.username}
 
 
 async def routes_for_username(session: AsyncSession, username: str) -> list[Route]:
@@ -146,6 +194,20 @@ async def routes_for_username(session: AsyncSession, username: str) -> list[Rout
         .join(Source, Source.id == Route.source_id)
         .where(
             Source.username == uname,
+            Source.is_active.is_(True),
+            Route.is_active.is_(True),
+        )
+        .options(selectinload(Route.source), selectinload(Route.destination))
+    )
+    return list(result.scalars().all())
+
+
+async def routes_for_chat_id(session: AsyncSession, chat_id: int) -> list[Route]:
+    result = await session.execute(
+        select(Route)
+        .join(Source, Source.id == Route.source_id)
+        .where(
+            Source.chat_id == chat_id,
             Source.is_active.is_(True),
             Route.is_active.is_(True),
         )

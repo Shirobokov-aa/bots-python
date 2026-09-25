@@ -39,7 +39,7 @@ class Destination(Base, TimestampMixin):
 
 
 class Source(Base, TimestampMixin):
-    """Public TG channel to mirror."""
+    """TG channel to mirror (public @username and/or chat_id)."""
 
     __tablename__ = "sources"
     __table_args__ = (UniqueConstraint("user_id", "username", name="uq_user_source_username"),)
@@ -47,6 +47,8 @@ class Source(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     username: Mapped[str] = mapped_column(String(64), index=True)
+    # Telegram peer id (-100…); set after Telethon resolve — needed when channel has no @
+    chat_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True, index=True)
     title: Mapped[str | None] = mapped_column(String(256), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 

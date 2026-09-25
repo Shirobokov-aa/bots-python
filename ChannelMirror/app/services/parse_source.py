@@ -29,6 +29,15 @@ class ParsedChannel:
     url: str
 
 
+@dataclass
+class ParsedInvite:
+    """Private invite: t.me/+HASH or t.me/joinchat/HASH."""
+
+    hash: str
+    display: str
+    url: str
+
+
 def extract_candidate(text: str) -> str | None:
     raw = (text or "").strip()
     if not raw:
@@ -72,6 +81,39 @@ def parse_channel(text: str) -> ParsedChannel | None:
         display=f"@{username}",
         url=f"https://t.me/{username}",
     )
+
+
+def parse_invite(text: str) -> ParsedInvite | None:
+    candidate = extract_candidate(text)
+    if not candidate:
+        raw = (text or "").strip().split()[0] if (text or "").strip() else ""
+        if raw.startswith("+") and len(raw) > 2:
+            h = raw[1:]
+            return ParsedInvite(hash=h, display=f"t.me/+{h}", url=f"https://t.me/+{h}")
+        return None
+    if not candidate.startswith("http"):
+        if candidate.startswith("t.me/") or candidate.startswith("telegram.me/"):
+            candidate = "https://" + candidate
+        else:
+            return None
+    host = urlsplit(candidate).netloc.lower()
+    if host not in TG_HOSTS:
+        return None
+    parts = [p for p in urlsplit(candidate).path.split("/") if p]
+    if not parts:
+        return None
+    if parts[0].startswith("+") and len(parts[0]) > 1:
+        h = parts[0][1:]
+        return ParsedInvite(hash=h, display=f"t.me/+{h}", url=f"https://t.me/+{h}")
+    if parts[0] == "joinchat" and len(parts) >= 2:
+        h = parts[1]
+        return ParsedInvite(hash=h, display=f"t.me/joinchat/{h}", url=f"https://t.me/joinchat/{h}")
+    return None
+
+
+def private_source_slug(chat_id: int) -> str:
+    """Internal username for sources without public @."""
+    return f"id{abs(int(chat_id))}"
 
 
 def _telegram_username(url: str) -> str | None:

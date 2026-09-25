@@ -26,7 +26,7 @@ def _ext_for(message: Message) -> str:
         return ".jpg"
     if message.video or message.video_note:
         return ".mp4"
-    if message.animation:
+    if getattr(message, "gif", None):
         return ".mp4"
     if message.voice:
         return ".ogg"
@@ -69,6 +69,8 @@ async def serialize_message(message: Message) -> dict[str, Any]:
         media_type = "photo"
         if message.video:
             media_type = "video"
+        elif getattr(message, "gif", None):
+            media_type = "animation"
         elif message.document and not message.photo:
             media_type = "document"
         path = await _download(message, _ext_for(message))
@@ -93,7 +95,8 @@ async def serialize_message(message: Message) -> dict[str, Any]:
         path = await _download(message, ".mp4")
         return {"type": "video_note", "path": path, "text": text}
 
-    if message.animation:
+    # Telethon: .gif (not .animation)
+    if getattr(message, "gif", None):
         path = await _download(message, ".mp4")
         return {"type": "animation", "path": path, "text": text}
 

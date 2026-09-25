@@ -22,6 +22,15 @@ def _sqlite_foreign_keys(dbapi_connection, _connection_record) -> None:
 
 async def init_db() -> None:
     from app.db import models  # noqa: F401
+    from sqlalchemy import text
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Lightweight migrate for existing sqlite DBs
+        def _migrate(sync_conn) -> None:
+            rows = sync_conn.execute(text("PRAGMA table_info(sources)")).fetchall()
+            cols = {r[1] for r in rows}
+            if "chat_id" not in cols:
+                sync_conn.execute(text("ALTER TABLE sources ADD COLUMN chat_id BIGINT"))
+
+        await conn.run_sync(_migrate)

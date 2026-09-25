@@ -16,9 +16,23 @@ def test_at_and_links() -> None:
     assert p.username == "navalny"
 
 
-def test_invite_rejected() -> None:
+def test_invite_rejected_as_public() -> None:
     assert parse_channel("https://t.me/+AbCdEf") is None
     assert parse_channel("https://t.me/share/url") is None
+
+
+def test_parse_invite() -> None:
+    from app.services.parse_source import parse_invite
+
+    inv = parse_invite("https://t.me/+AbCdEfGh")
+    assert inv is not None
+    assert inv.hash == "AbCdEfGh"
+
+    inv = parse_invite("https://t.me/joinchat/AAAAA")
+    assert inv is not None
+    assert inv.hash == "AAAAA"
+
+    assert parse_invite("@durov") is None
 
 
 def test_merge_album() -> None:
