@@ -3,19 +3,22 @@
 Канон: `docs/VISION.md`. План: `docs/business-plan.md`. Согласовано: `docs/agreed.md`.
 
 ## В работе
-_(пусто)_
+- [ ] AiGateway: согласовать план (`AiGateway/PLAN.md`), потом MVP. → commit: `docs(aigateway): plan gateway service`
 
 ## Очередь
-- [ ] #11 живой прогон: bot token + Telethon session + канал. → commit: —
+- [ ] GHA secrets `SSH_*` в `bots-python` + push workflow (автодеплой). → commit: `chore(channelmirror): docker compose and vps deploy`
 - [ ] #10 живой прогон: token + marker + канал. → commit: —
 - [ ] #8 SmartDigest: ИИ-выжимка в бот (главный гэп). → commit: `feat(smartdigest): ai digest to bot`
 - [ ] #8 позже: SQLite → PostgreSQL. → commit: `feat(smartdigest): migrate to postgresql`
-- [ ] #3 AI-автомат. → commit: `feat(ai): …`
+- [ ] #3 AI-автомат (user-facing). Инфра = `AiGateway/`, не путать. → commit: `feat(ai): …`
 - [ ] #7 Кино-бот без Reels. → commit: `feat(cinema): …`
 - [ ] #9 Гороскопы. → commit: `feat(horoscope): …`
 - [ ] #7 Reels — на потом. → commit: позже
 
 ## Сделано
+### 2026-09-25
+- **ChannelMirror на antru.** `/opt/bots/channelmirror`, compose up, Telethon + polling ок; локальный процесс остановлен. → commit: `chore(channelmirror): docker compose and vps deploy`
+- **План AiGateway.** Отдельный сервис filter/rewrite над OpenRouter free для всех ботов. → commit: `docs(aigateway): plan gateway service`
 ### 2026-09-24
 - **Monorepo порядок:** `docs/` (VISION/agreed/business-plan/ideals), gitignore, `git init` на `bots-python/`, убран nested `SmartDigest/.git`. → commit: `chore(repo): monorepo layout and docs`
 - **#11 ChannelMirror MVP** в `ChannelMirror/`: silent copy, очередь, TODO(ai). → commit: `feat(channelmirror): mvp silent copy queue`

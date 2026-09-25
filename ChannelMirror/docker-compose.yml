@@ -1,0 +1,11 @@
+services:
+  bot:
+    build: .
+    container_name: channelmirror
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    # polling — порт наружу не нужен; health через docker logs
+    expose:
+      - "8003"

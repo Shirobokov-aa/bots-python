@@ -1,0 +1,49 @@
+name: Deploy ChannelMirror
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ChannelMirror/**"
+      - ".github/workflows/deploy-channelmirror.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-channelmirror
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync ChannelMirror to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "ChannelMirror/"
+          target: /opt/bots/channelmirror
+          strip_components: 1
+          overwrite: true
+          rm: false
+          exclude: ".venv,venv,__pycache__,.pytest_cache,.git,data,.env,.env.*,*.db,*.session,telethon_qr.png,STATUS.md,README.md,tests"
+
+      - name: Build and restart
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            cd /opt/bots/channelmirror
+            mkdir -p data/media
+            docker compose up -d --build --remove-orphans
+            docker image prune -f
