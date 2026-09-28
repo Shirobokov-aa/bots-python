@@ -27,7 +27,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           # .env / data не в git — на сервере не затираются (rm: false)
-          source: "ChannelMirror/,!ChannelMirror/.venv,!ChannelMirror/data,!ChannelMirror/tests,!ChannelMirror/STATUS.md,!ChannelMirror/README.md"
+          source: "ChannelMirror/,!ChannelMirror/.venv,!ChannelMirror/data,!ChannelMirror/tests,!ChannelMirror/STATUS.md,!ChannelMirror/README.md,!ChannelMirror/.pytest_cache,!ChannelMirror/pytest.ini,!ChannelMirror/requirements-dev.txt"
           target: /opt/bots/channelmirror
           strip_components: 1
           overwrite: true
@@ -44,5 +44,8 @@ jobs:
             set -euo pipefail
             cd /opt/bots/channelmirror
             mkdir -p data/media
+            # leftover from first sync / local junk — not needed at runtime
+            rm -rf tests .pytest_cache __pycache__
+            rm -f STATUS.md README.md pytest.ini requirements-dev.txt telethon_qr.png
             docker compose up -d --build --remove-orphans
             docker image prune -f

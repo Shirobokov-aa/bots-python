@@ -44,9 +44,10 @@ class AddPrivateSource(StatesGroup):
 
 
 def _is_admin(telegram_id: int) -> bool:
+    """Fail-closed: empty ADMIN_TELEGRAM_IDS → nobody is admin."""
     admins = get_settings().admin_ids
     if not admins:
-        return True
+        return False
     return telegram_id in admins
 
 

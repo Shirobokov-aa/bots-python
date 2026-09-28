@@ -31,6 +31,7 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     if not settings.telegram_bot_token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN пустой")
+    settings.validate_runtime()
 
     _ensure_dirs()
     await init_db()
@@ -49,8 +50,6 @@ async def lifespan(app: FastAPI):
     poll_task = None
 
     if settings.telegram_mode == "webhook":
-        if not settings.telegram_webhook_url:
-            raise RuntimeError("TELEGRAM_WEBHOOK_URL нужен для webhook")
         await bot.set_webhook(
             url=settings.telegram_webhook_url,
             secret_token=settings.telegram_webhook_secret,

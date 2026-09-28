@@ -200,10 +200,6 @@ async def active_sources(session: AsyncSession) -> list[Source]:
     return list(result.scalars().all())
 
 
-async def active_source_usernames(session: AsyncSession) -> set[str]:
-    return {s.username for s in await active_sources(session) if s.username}
-
-
 async def routes_for_username(session: AsyncSession, username: str) -> list[Route]:
     uname = username.lower().lstrip("@")
     result = await session.execute(

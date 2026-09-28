@@ -5,3 +5,5 @@ data/
 __pycache__/
 .pytest_cache/
 *.pyc
+telethon_qr.png
+.DS_Store

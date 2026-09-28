@@ -20,13 +20,15 @@ Silent copy: открытые TG-источники → твои каналы. �
 ```bash
 cd ChannelMirror
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # prod image: requirements.txt only
 cp .env.example .env
-# заполни TELEGRAM_BOT_TOKEN, ADMIN_TELEGRAM_IDS, TELEGRAM_API_ID, TELEGRAM_API_HASH
+# заполни TELEGRAM_BOT_TOKEN, ADMIN_TELEGRAM_IDS (обязательно), TELEGRAM_API_ID/HASH
 python scripts/telethon_login.py --qr   # QR login → TELEGRAM_SESSION
 # или phone-код: python scripts/telethon_login.py  (код чаще в чате Telegram, не SMS)
 uvicorn app.main:app --host 0.0.0.0 --port 8003
 ```
+
+Прод: медиа после публикации удаляются; очередь `posted`/`failed` старше 7 дней и `seen_posts` старше 30 — pruning в scheduler.
 
 ## Команды бота
 

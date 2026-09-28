@@ -20,3 +20,6 @@ telethon_qr.png
 STATUS.md
 README.md
 tests
+pytest.ini
+requirements-dev.txt
+*.md

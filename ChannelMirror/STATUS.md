@@ -7,6 +7,8 @@
 - [ ] TODO(ai): рерайт текста. → commit: `feat(channelmirror): ai rewrite`
 
 ## Сделано
+### 2026-09-28
+- **Аудит+фиксы.** Admin fail-closed + startup check; media delete after post + maintenance prune; slim Dockerfile/requirements; VPS: −212 MB media, junk `tests`/docs. → commit: `fix(channelmirror): audit harden and cleanup`
 ### 2026-09-25
 - **Подпись Источник.** При создании маршрута кнопки «С источником» / «Без»; `/toggle_source ID`. В пост: `Источник: "Название"` — только текст, без ссылки. → commit: `feat(channelmirror): optional source label`
 - **GHA автодеплой.** Secrets + path workflow; бот уже постит с VPS. → commit: `ci(channelmirror): fix scp exclude syntax`

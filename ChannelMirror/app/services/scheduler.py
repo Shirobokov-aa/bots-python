@@ -8,11 +8,15 @@ from aiogram import Bot
 
 from app.config import get_settings
 from app.db.session import SessionLocal
+from app.services.media_cleanup import cleanup_payload_media, run_maintenance
 from app.services.queue import destinations_due, mark_failed, mark_posted, next_pending_for_destination
 from app.services.publisher import safe_publish
 from app.services.source_label import apply_source_label_to_payload, source_display_name
 
 log = logging.getLogger("channelmirror.scheduler")
+
+# Run DB/media prune every N publish ticks (~1h at default 30s tick).
+_MAINTENANCE_EVERY = 120
 
 
 async def publish_tick(bot: Bot) -> int:
@@ -38,6 +42,7 @@ async def publish_tick(bot: Bot) -> int:
                 await mark_failed(session, item, err)
             else:
                 await mark_posted(session, item, dest)
+                cleanup_payload_media(payload)
                 posted += 1
         await session.commit()
     if posted:
@@ -47,6 +52,7 @@ async def publish_tick(bot: Bot) -> int:
 
 async def scheduler_loop(bot: Bot, stop: asyncio.Event) -> None:
     settings = get_settings()
+    ticks = 0
     try:
         await asyncio.wait_for(stop.wait(), timeout=3)
         return
@@ -56,6 +62,11 @@ async def scheduler_loop(bot: Bot, stop: asyncio.Event) -> None:
     while not stop.is_set():
         try:
             await publish_tick(bot)
+            ticks += 1
+            if ticks == 1 or ticks % _MAINTENANCE_EVERY == 0:
+                async with SessionLocal() as session:
+                    await run_maintenance(session)
+                    await session.commit()
         except Exception:
             log.exception("publish tick error")
         try:
