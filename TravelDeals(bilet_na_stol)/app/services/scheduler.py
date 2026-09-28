@@ -7,7 +7,7 @@ from aiogram import Bot
 
 from app.config import get_settings
 from app.db.session import SessionLocal
-from app.services.channel import post_deal_photo, send_deal_dm
+from app.services.channel import hotel_for_flight, post_deal_photo, send_deal_dm
 from app.services.deals import (
     collect_channel_candidates,
     deal_dedupe,
@@ -37,7 +37,8 @@ async def run_deal_tick(bot: Bot) -> int:
                 continue
             ok = False
             if channel_id is not None:
-                ok = await post_deal_photo(bot, channel_id, deal)
+                hotel = await hotel_for_flight(deal)
+                ok = await post_deal_photo(bot, channel_id, deal, hotel=hotel)
             await mark_posted(
                 session,
                 key=key,

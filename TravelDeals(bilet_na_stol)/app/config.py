@@ -19,6 +19,8 @@ class Settings(BaseSettings):
 
     travelpayouts_token: str = ""
     travelpayouts_marker: str = ""
+    # Project ID (trs) for Links API — Tools URL ?source=… or список проектов
+    travelpayouts_trs: str = ""
 
     deal_tick_seconds: int = 3600
     http_timeout: float = 25.0
@@ -35,10 +37,18 @@ class Settings(BaseSettings):
         return ids
 
     @property
+    def trs_id(self) -> int | None:
+        raw = self.travelpayouts_trs.strip()
+        return int(raw) if raw.isdigit() else None
+
+    @property
     def channel_chat_id(self) -> int | None:
-        raw = self.telegram_channel_id.strip()
+        raw = self.telegram_channel_id.strip().strip("\"'")
         if not raw:
             return None
+        # tolerate accidental "--100…"
+        while raw.startswith("--"):
+            raw = raw[1:]
         try:
             return int(raw)
         except ValueError:

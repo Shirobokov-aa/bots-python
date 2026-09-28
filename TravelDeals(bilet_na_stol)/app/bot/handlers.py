@@ -13,7 +13,7 @@ from app.bot import texts
 from app.bot.keyboards import (
     alerts_kb,
     flight_results_kb,
-    hotel_results_kb,
+    hotel_deeplink_kb,
     main_kb,
     tour_results_kb,
 )
@@ -21,9 +21,14 @@ from app.config import get_settings
 from app.db.models import User
 from app.services.alerts import add_alert, deactivate_alert, list_alerts
 from app.services.cities import city_name, resolve_city
-from app.services.deals import flight_caption, hotel_caption, tour_caption
+from app.services.deals import flight_caption
+from app.services.hotel_links import (
+    build_hotel_deeplink,
+    hotel_dates_for_flight,
+    wrap_hotel_deeplink,
+)
 from app.services.scheduler import run_deal_tick
-from app.services.travelpayouts import TourDeal, get_tp_client
+from app.services.travelpayouts import get_tp_client
 
 router = Router()
 
@@ -175,21 +180,19 @@ async def hotel_search(message: Message, state: FSMContext) -> None:
         return
     data = await state.get_data()
     await state.clear()
-    if not get_settings().travelpayouts_token:
-        await message.answer(texts.need_token())
-        return
 
-    check_in = date.today() + timedelta(days=21)
-    check_out = check_in + timedelta(days=nights)
-    await message.answer("Ищу отели…")
-    deals = await get_tp_client().hotels(data["city"], check_in, check_out, limit=5)
-    if not deals:
-        await message.answer("Отелей не нашёл. Проверь token / город.")
+    offer = build_hotel_deeplink(data["city"], nights=nights)
+    if offer is None:
+        await message.answer(texts.unknown_city())
         return
-    lines = [hotel_caption(d) for d in deals[:3]]
+    offer = await wrap_hotel_deeplink(offer, sub_id="bot_hotel")
     await message.answer(
-        "\n\n—\n\n".join(lines),
-        reply_markup=hotel_results_kb(deals),
+        (
+            f"<b>Отели · {city_name(offer.city_iata)}</b>\n"
+            f"{offer.check_in} → {offer.check_out} · {offer.nights} ноч.\n\n"
+            "Цены смотри на сайте партнёра — кнопки ниже."
+        ),
+        reply_markup=hotel_deeplink_kb(offer),
         disable_web_page_preview=True,
     )
 
@@ -228,20 +231,27 @@ async def tour_search(message: Message, state: FSMContext) -> None:
     origin = data["origin"]
     dest = city.iata
     await message.answer("Собираю комбо…")
-    client = get_tp_client()
-    flights = await client.latest_flights(origin, dest, limit=5)
-    check_in = date.today() + timedelta(days=21)
-    check_out = check_in + timedelta(days=7)
-    hotels = await client.hotels(dest, check_in, check_out, limit=5)
-    if not flights or not hotels:
-        await message.answer("Не собрал комбо. Попробуй /flight и /hotel отдельно.")
+    flights = await get_tp_client().latest_flights(origin, dest, limit=5)
+    if not flights:
+        await message.answer("Билетов не нашёл. Попробуй /flight отдельно.")
         return
 
-    tours = [TourDeal(flight=f, hotel=h) for f, h in zip(flights[:2], hotels[:2])]
-    lines = [tour_caption(t) for t in tours]
+    top = flights[:2]
+    check_in, check_out = hotel_dates_for_flight(top[0].depart_date, top[0].return_date)
+    hotel = build_hotel_deeplink(dest, check_in=check_in, check_out=check_out)
+    if hotel:
+        hotel = await wrap_hotel_deeplink(hotel, sub_id="bot_tour")
+
+    lines = [flight_caption(f) for f in top]
+    hotel_line = ""
+    if hotel:
+        hotel_line = (
+            f"\n\nОтели в {city_name(dest)} на даты первого варианта "
+            f"({hotel.check_in} → {hotel.check_out}) — кнопки ниже."
+        )
     await message.answer(
-        "\n\n—\n\n".join(lines),
-        reply_markup=tour_results_kb(tours),
+        "<b>Билет + отель</b>\n\n" + "\n\n—\n\n".join(lines) + hotel_line,
+        reply_markup=tour_results_kb(top, hotel=hotel),
         disable_web_page_preview=True,
     )
 

@@ -5,7 +5,6 @@ from app.services.travelpayouts import (
     FlightDeal,
     dedupe_key,
     flight_search_link,
-    hotel_search_link,
     price_bucket,
 )
 
@@ -14,6 +13,13 @@ def test_resolve_city_ru_and_iata():
     assert resolve_city("Москва").iata == "MOW"
     assert resolve_city("ayt").iata == "AYT"
     assert resolve_city("xyz") is None
+
+
+def test_resolve_new_cities():
+    assert resolve_city("Тбилиси").iata == "TBS"
+    assert resolve_city("шарм").iata == "SSH"
+    assert resolve_city("бали").iata == "DPS"
+    assert resolve_city("Краснодар").iata == "KRR"
 
 
 def test_flight_search_link_one_way():
@@ -26,13 +32,6 @@ def test_flight_search_link_roundtrip():
     link = flight_search_link("LED", "IST", date(2026, 7, 1), date(2026, 7, 10), "m")
     assert "LED0107IST10071" in link
     assert "marker=m" in link
-
-
-def test_hotel_search_link():
-    link = hotel_search_link("Анталья", date(2026, 6, 1), date(2026, 6, 8), "mk", hotel_id=42)
-    assert "hotelId=42" in link
-    assert "marker=mk" in link
-    assert "checkIn=2026-06-01" in link
 
 
 def test_price_bucket_and_dedupe():

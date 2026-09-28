@@ -2,7 +2,7 @@
 
 Telegram-бот + канал горящих авиа/отелей/комбо-туров. CPA через Travelpayouts (Aviasales + Hotellook).
 
-Идея #10 в `../agreed.md`. Статус: [`STATUS.md`](STATUS.md).
+Идея #10 в `../agreed.md`. Статус: [`STATUS.md`](STATUS.md). Доки и идеи: [`docs/`](docs/).
 
 ## Что умеет
 
