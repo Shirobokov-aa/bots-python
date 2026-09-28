@@ -4,6 +4,7 @@
 
 ## В работе
 - [ ] P9 Яндекс API: whitelist логина → OAuth → тест → код цен. → commit: `feat(traveldeals): yandex travel hotel prices`
+- [ ] Деплой antru: workflow + bootstrap `/opt/bots/traveldeals`. → commit: `ci(traveldeals): deploy workflow and docker`
 
 ## Очередь
 - [ ] Вставить закреп/описание из `docs/ideas/C3-channel-pin.md` в канал (руками). → commit: —

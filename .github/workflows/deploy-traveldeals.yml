@@ -1,0 +1,50 @@
+name: Deploy TravelDeals
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "TravelDeals/**"
+      - ".github/workflows/deploy-traveldeals.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-traveldeals
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync TravelDeals to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # .env / data не в git — на сервере не затираются (rm: false)
+          source: "TravelDeals/,!TravelDeals/.venv,!TravelDeals/data,!TravelDeals/tests,!TravelDeals/STATUS.md,!TravelDeals/README.md,!TravelDeals/docs,!TravelDeals/.pytest_cache,!TravelDeals/pytest.ini"
+          target: /opt/bots/traveldeals
+          strip_components: 1
+          overwrite: true
+          rm: false
+
+      - name: Build and restart
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            cd /opt/bots/traveldeals
+            mkdir -p data
+            rm -rf tests docs .pytest_cache __pycache__
+            rm -f STATUS.md README.md pytest.ini
+            docker compose up -d --build --remove-orphans
+            docker image prune -f

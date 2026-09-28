@@ -196,6 +196,12 @@ ssh antru-vps 'docker logs channelmirror --tail=50'
 
 ## Короткий шаблон имени
 
+| Папка репо | `TravelDeals/` (канал «Билет на стол») |
+| Путь VPS | `/opt/bots/traveldeals` |
+| Container | `traveldeals` |
+| Workflow | `deploy-traveldeals.yml` |
+| Concurrency | `deploy-traveldeals` |
+
 ```
 папка репо:     TravelDeals/
 путь VPS:       /opt/bots/traveldeals
