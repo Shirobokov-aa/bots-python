@@ -15,6 +15,8 @@
 - [ ] #7 Reels — на потом. → commit: позже
 
 ## Сделано
+### 2026-09-28
+- **Карта antru.** `docs/antru-map.md` + правило `.cursor/rules/antru-vps-map.mdc` (обновлять при деплое/доменах). → commit: `docs(antru): server map and agent rule`
 ### 2026-09-25
 - **Док деплоя.** `docs/deploy.md` — шаблон выката ботов на antru по образцу ChannelMirror. → commit: `docs(deploy): vps bot deploy guide`
 - **GHA автодеплой.** Secrets `SSH_*` + path-filter workflow; rerun success. → commit: `ci(channelmirror): fix scp exclude syntax`

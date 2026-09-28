@@ -4,7 +4,6 @@
 
 ## В работе
 - [ ] P9 Яндекс API: whitelist логина → OAuth → тест → код цен. → commit: `feat(traveldeals): yandex travel hotel prices`
-- [ ] Деплой antru: workflow + bootstrap `/opt/bots/traveldeals`. → commit: `ci(traveldeals): deploy workflow and docker`
 
 ## Очередь
 - [ ] Вставить закреп/описание из `docs/ideas/C3-channel-pin.md` в канал (руками). → commit: —
@@ -14,6 +13,7 @@
 
 ## Сделано
 ### 2026-09-28
+- **Деплой antru.** Папка `TravelDeals/`, `/opt/bots/traveldeals`, GHA `deploy-traveldeals.yml`, контейнер Up + polling `@bilet_na_stol_bot`. → commit: `ci(traveldeals): deploy to antru like ChannelMirror`
 - **Шпаргалка Yandex Travel API.** Host, OAuth, limits, search/suggest/offers, curl, план бота → `yandex-travel-api.md`. → commit: `docs(traveldeals): yandex travel api cheatsheet`
 - **Ответ Яндекса по API.** Не отказ: аккаунт + OAuth + ≤50 rps; план whitelist в `yandex-api-request.md`. → commit: `docs(traveldeals): yandex api whitelist path`
 - **Полировка MVP 1–7.** Даты отеля=вылет; спокойные captions; Hotellook/HotelDeal вычищены; C3 текст; чеклист TRS/программ; ~30 городов; `routes.yaml` шире. → commit: `feat(traveldeals): polish mvp without hotel prices`

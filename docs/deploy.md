@@ -3,6 +3,8 @@
 Как выкатывать сервисы из monorepo `bots-python` на Beget VPS.  
 Эталон в проде: **ChannelMirror** → `/opt/bots/channelmirror` + workflow `.github/workflows/deploy-channelmirror.yml`.
 
+**Живая карта сервера (домены, контейнеры, пути):** [`antru-map.md`](antru-map.md) — обновлять при каждом изменении на VPS.
+
 Нюансы у каждого бота свои (БД, webhook, Telethon-session) — ниже каркас, не догма.
 
 ---

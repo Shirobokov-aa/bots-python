@@ -11,7 +11,8 @@
 `- [ ] … → commit: feat(scope): …`
 
 Канон: `docs/VISION.md`. План: `docs/business-plan.md`. Согласовано: `docs/agreed.md`.  
-Маркетинг: `docs/product-marketing.md`.
+Маркетинг: `docs/product-marketing.md`.  
+VPS antru (домены/контейнеры): `docs/antru-map.md` — обновлять при деплое/доменах (правило `.cursor/rules/antru-vps-map.mdc`).
 
 ## 2. Коммиты — только предложение
 

@@ -24,6 +24,7 @@ bots-python/
 | [`docs/ideals.md`](docs/ideals.md) | Банк сырых идей |
 | [`docs/product-marketing.md`](docs/product-marketing.md) | Маркетинг-контекст |
 | [`docs/deploy.md`](docs/deploy.md) | Деплой ботов на antru (GHA + Docker) |
+| [`docs/antru-map.md`](docs/antru-map.md) | Живая карта VPS: домены Caddy, `/opt/bots`, `/opt/apps` |
 | [`STATUS.md`](STATUS.md) | Что в работе / очередь / сделано |
 
 Статус конкретного бота: `<Bot>/STATUS.md`.
