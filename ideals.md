@@ -1,1 +1,1 @@
-> Перенесено → [`docs/ideals.md`](docs/ideals.md)
+> Канон банка идей: [`docs/ideals.md`](docs/ideals.md)

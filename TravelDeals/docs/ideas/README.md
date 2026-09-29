@@ -10,4 +10,5 @@
 |----|------|--------|
 | M1 | [M1-channel-digests.md](M1-channel-digests.md) | зафиксировано |
 | M2 | [M2-bot-search.md](M2-bot-search.md) | зафиксировано |
+| P3 | [P3-hot-packages.md](P3-hot-packages.md) | зафиксировано (после MVP) |
 | P8 | [P8-hotel-deeplink.md](P8-hotel-deeplink.md) | в работе |

@@ -16,6 +16,11 @@
 
 ## Сделано
 ### 2026-09-28
+- **#52 этап 1 = автовладелец.** `scenarios.md`: P0 fines/preview/report; этап 2+ отложен. Ideals #52 → api-cloud. → commit: `docs(api-cloud): stage1 auto-owner scenarios`
+- **Заявка ФЛ api-cloud.** Черновик письма `api-cloud.ru/reg-request-fl.md` (support + API этапа 1). → commit: `docs(api-cloud): fl registration email draft`
+- **api-cloud.ru каталог.** Папка `api-cloud.ru/`: CATALOG.md + catalog.json (~33 API, ~80 методов с ценами) + черновик scenarios.md. → commit: `docs(api-cloud): catalog methods and prices`
+- **#46 API-разбор.** WB/Ozon: остатки+отзывы ок; поиск WB=Jam; конкуренты WB нет в Seller; Ozon отзывы≈Premium Plus; Performance ≠ Seller. Матрица в `docs/ideals.md`. → commit: `docs(ideals): seller-assistant api matrix`
+- **Ideals слиты.** Корневой черновик → `docs/ideals.md` волна 3 (#46–52) + скоринг; корень = указатель. → commit: `docs(ideals): sync wave 3 and scores`
 - **Карта antru.** `docs/antru-map.md` + правило `.cursor/rules/antru-vps-map.mdc` (обновлять при деплое/доменах). → commit: `docs(antru): server map and agent rule`
 ### 2026-09-25
 - **Док деплоя.** `docs/deploy.md` — шаблон выката ботов на antru по образцу ChannelMirror. → commit: `docs(deploy): vps bot deploy guide`

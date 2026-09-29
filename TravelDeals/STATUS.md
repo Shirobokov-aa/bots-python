@@ -7,12 +7,13 @@
 
 ## Очередь
 - [ ] Вставить закреп/описание из `docs/ideas/C3-channel-pin.md` в канал (руками). → commit: —
-- [ ] Level.Travel как отдельный провайдер туров. → commit: позже
+- [ ] **P3** Горящие пакетные туры (Level.Travel / пакет) — после живого MVP; карточка `docs/ideas/P3-hot-packages.md`. → commit: `feat(traveldeals): hot package tours provider`
 - [ ] Заполнить «Мои программы» в `docs/travelpayouts/programs.md` после логина в каталог. → commit: `docs(traveldeals): my programs list`
 - [ ] Чеклист закона о рекламе в ЛК (форма ЕРИР + пометки в постах). → commit: позже
 
 ## Сделано
 ### 2026-09-28
+- **Лок P3.** Горящие пакетные туры (#47 ideals) → карточка `docs/ideas/P3-hot-packages.md`; #48/#49 вычеркнуты в `docs/ideals.md`. → commit: `docs(traveldeals): lock P3 hot package tours`
 - **Деплой antru.** Папка `TravelDeals/`, `/opt/bots/traveldeals`, GHA `deploy-traveldeals.yml`, контейнер Up + polling `@bilet_na_stol_bot`. → commit: `ci(traveldeals): deploy to antru like ChannelMirror`
 - **Шпаргалка Yandex Travel API.** Host, OAuth, limits, search/suggest/offers, curl, план бота → `yandex-travel-api.md`. → commit: `docs(traveldeals): yandex travel api cheatsheet`
 - **Ответ Яндекса по API.** Не отказ: аккаунт + OAuth + ≤50 rps; план whitelist в `yandex-api-request.md`. → commit: `docs(traveldeals): yandex api whitelist path`

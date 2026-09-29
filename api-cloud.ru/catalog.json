@@ -1,0 +1,394 @@
+{
+  "sourced_at": "2026-09-28",
+  "source_url": "https://api-cloud.ru/tarif",
+  "currency": "RUB",
+  "billing": {
+    "charge_on_status": 200,
+    "min_monthly_fee_rub": 700,
+    "min_monthly_fee_applies_below_requests": 2000,
+    "min_monthly_fee_note": "Аккаунты после 29.02.2024. Не отменяет оплату запросов.",
+    "timeout_seconds_recommended": 120,
+    "token_header": "Token",
+    "not_public_offer": true
+  },
+  "apis": [
+    {
+      "id": "gibdd",
+      "name": "ГИБДД",
+      "docs": "https://api-cloud.ru/gibdd",
+      "endpoint": "https://api-cloud.ru/api/gibdd.php",
+      "group": "auto",
+      "methods": [
+        {"type": "driver", "title": "Проверка ВУ (legacy)", "price_rub": null, "price_note": "В примерах docs inquiry.price≈0.80", "inputs": ["serianomer", "date"]},
+        {"type": "driverv2", "title": "Проверка ВУ v2 + лишения", "price_rub": 0.5, "inputs": ["lastname", "firstname", "serianomer", "date", "secondname?"]},
+        {"type": "restrict", "title": "Ограничения на ТС", "price_rub": null, "inputs": ["vin"]},
+        {"type": "wanted", "title": "Розыск ТС", "price_rub": null, "inputs": ["vin"]},
+        {"type": "dtp", "title": "ДТП", "price_rub": null, "inputs": ["vin", "dtpimg?"]},
+        {"type": "fines", "title": "Штрафы", "price_rub": null, "price_note": "В примерах docs inquiry.price≈0.80", "inputs": ["regNumber", "stsNumber", "requisites?"]},
+        {"type": "finesPhoto", "title": "Фото нарушения", "price_rub": null, "inputs": ["postNum", "regNumber", "division", "photoToken"]},
+        {"type": "eaisto", "title": "ДК и пробег через ГИБДД", "price_rub": null, "inputs": ["vin"]},
+        {"type": "otoInfo", "title": "Оператор ТО", "price_rub": 0.1, "inputs": ["id"]}
+      ]
+    },
+    {
+      "id": "eaisto",
+      "name": "ЕАИСТО",
+      "docs": "https://api-cloud.ru/eaisto",
+      "endpoint": "https://api-cloud.ru/api/eaisto/v2/eaisto.php",
+      "group": "auto",
+      "methods": [
+        {"type": "mileage", "title": "ДК и пробег (не кэш)", "price_rub": 6.0, "inputs": ["string"]}
+      ]
+    },
+    {
+      "id": "rsa",
+      "name": "РСА (НСИС)",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "kbm", "title": "КБМ", "price_rub": 0.5},
+        {"type": "osago", "title": "Полисы ОСАГО по VIN/номеру", "price_rub": 0.5},
+        {"type": "osagochek", "title": "Полис ОСАГО по серии и номеру", "price_rub": 0.5}
+      ]
+    },
+    {
+      "id": "pledges",
+      "name": "ФНП реестр залогов",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "notary", "title": "Залог ТС", "price_rub": 1.0},
+        {"type": "fedresurs", "title": "Лизинг ТС", "price_rub": 1.0},
+        {"type": "notaryPledgor", "title": "Залоги по залогодателю", "price_rub": 1.0},
+        {"type": "notaryPledgorFedres", "title": "Федресурс по залогодателю", "price_rub": 1.0},
+        {"type": "otherNotary", "title": "Иное движимое имущество", "price_rub": 1.0},
+        {"type": "notification", "title": "Уведомление о залоге", "price_rub": 1.0}
+      ]
+    },
+    {
+      "id": "recalls",
+      "name": "Отзывные кампании (Росстандарт)",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "vin", "title": "Отзыв по VIN", "price_rub": 0.2},
+        {"type": "certificate", "title": "Сертификат безопасности ТС", "price_rub": 0.2}
+      ]
+    },
+    {
+      "id": "photos",
+      "name": "Фотографии ТС",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "regnum", "title": "Фото по госномеру", "price_rub": 0.7}
+      ]
+    },
+    {
+      "id": "nomerogram",
+      "name": "Номерограм",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "photos", "title": "Фото + описание", "price_rub": 0.6}
+      ]
+    },
+    {
+      "id": "vin_converter",
+      "name": "Конвертер VIN ↔ рег.номер",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "search", "title": "VIN ↔ номер", "price_rub": 1.7}
+      ]
+    },
+    {
+      "id": "car_price",
+      "name": "Оценка стоимости авто",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "chekmodel", "title": "Модели", "price_rub": 0.3},
+        {"type": "chekyear", "title": "Годы", "price_rub": 0.3},
+        {"type": "chekgeneration", "title": "Поколения", "price_rub": 0.3},
+        {"type": "chekbody", "title": "Кузов / комплектация", "price_rub": 0.3},
+        {"type": "price", "title": "Оценочная стоимость", "price_rub": 0.3}
+      ]
+    },
+    {
+      "id": "taxi_history",
+      "name": "Проверка ТС по базе такси",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "search", "title": "История такси / лицензии", "price_rub": 0.47}
+      ]
+    },
+    {
+      "id": "fgis_taxi",
+      "name": "ФГИС Такси",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "search", "title": "Реестр такси по госномеру", "price_rub": 0.4}
+      ]
+    },
+    {
+      "id": "fts",
+      "name": "ФТС",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "auto", "title": "Таможня легковых ЕАЭС", "price_rub": 0.3}
+      ]
+    },
+    {
+      "id": "epts",
+      "name": "Электронный ПТС",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "pts", "title": "Сведения ЭПТС", "price_rub": 0.6}
+      ]
+    },
+    {
+      "id": "fri",
+      "name": "Федеральный реестр инвалидов",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "auto", "title": "ТС инвалида", "price_rub": 0.5}
+      ]
+    },
+    {
+      "id": "mos_transport",
+      "name": "Московский транспорт",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "pass", "title": "Пропуск грузовика", "price_rub": 0.6},
+        {"type": "rnis", "title": "РНИС", "price_rub": 0.6}
+      ]
+    },
+    {
+      "id": "avtodor",
+      "name": "Автодор платные дороги",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "payCheck", "title": "Начисления ЦКАД/М-12/А-289", "price_rub": 0.2}
+      ]
+    },
+    {
+      "id": "nsso",
+      "name": "НССО",
+      "docs": null,
+      "endpoint": null,
+      "group": "auto",
+      "methods": [
+        {"type": "checkPolicy", "title": "Договор обяз. страхования", "price_rub": 1.5},
+        {"type": "checkPolicyOPO", "title": "ОПО", "price_rub": 1.5}
+      ]
+    },
+    {
+      "id": "fssp",
+      "name": "ФССП",
+      "docs": "https://api-cloud.ru/fssp",
+      "endpoint": "https://api-cloud.ru/api/fssp.php",
+      "group": "people",
+      "methods": [
+        {"type": "physical", "title": "Поиск ФЛ", "price_rub": 0.6},
+        {"type": "legal", "title": "Поиск ЮЛ", "price_rub": 0.6},
+        {"type": "ip", "title": "По номеру ИП", "price_rub": 0.6},
+        {"type": "id", "title": "По номеру исполн. документа", "price_rub": 0.6},
+        {"type": "inn", "title": "ЮЛ по ИНН", "price_rub": 0.6},
+        {"type": "regionsList", "title": "Список регионов", "price_rub": 0.0},
+        {"type": "wanted", "title": "Розыск по ИП", "price_rub": 0.6},
+        {"type": "alim", "title": "Должники по алиментам", "price_rub": 0.6}
+      ]
+    },
+    {
+      "id": "nalog",
+      "name": "ФНС",
+      "docs": "https://api-cloud.ru/nalog",
+      "endpoint": "https://api-cloud.ru/api/nalog.php",
+      "group": "people",
+      "methods": [
+        {"type": "inn", "title": "Поиск ИНН ФЛ", "price_rub": 0.6},
+        {"type": "npd", "title": "Статус самозанятого", "price_rub": 0.6},
+        {"type": "invalidinn", "title": "Недействительные ИНН ФЛ", "price_rub": 0.6, "price_note": "Перепроверить на tarif — то появлялся, то нет в снимках"}
+      ]
+    },
+    {
+      "id": "mvd",
+      "name": "МВД",
+      "docs": null,
+      "endpoint": "https://api-cloud.ru/api/mvd.php",
+      "group": "people",
+      "methods": [
+        {"type": "chekpassportv2", "title": "Паспорт РФ live", "price_rub": 0.8},
+        {"type": "rkl", "title": "РКЛ", "price_rub": 0.3},
+        {"type": "rklv2", "title": "РКЛ v2", "price_rub": 0.3},
+        {"type": "patentv2", "title": "Патент на работу", "price_rub": 0.3},
+        {"type": "stopOperRS", "title": "Стоп операций по счетам", "price_rub": 0.3},
+        {"type": "wanted", "title": "Розыск МВД", "price_rub": 0.6}
+      ]
+    },
+    {
+      "id": "pfr",
+      "name": "ПФР",
+      "docs": null,
+      "endpoint": null,
+      "group": "people",
+      "methods": [
+        {"type": "check_snils", "title": "Проверка СНИЛС", "price_rub": 0.4}
+      ]
+    },
+    {
+      "id": "rosfinmonitoring",
+      "name": "Росфинмониторинг",
+      "docs": null,
+      "endpoint": null,
+      "group": "people",
+      "methods": [
+        {"type": "terextr", "title": "Террористы / экстремисты", "price_rub": 0.3}
+      ]
+    },
+    {
+      "id": "foreign_agents",
+      "name": "Реестр иностранных агентов",
+      "docs": null,
+      "endpoint": null,
+      "group": "people",
+      "methods": [
+        {"type": "search", "title": "Поиск по реестру", "price_rub": 0.25}
+      ]
+    },
+    {
+      "id": "bankruptcy",
+      "name": "Федресурс банкротства",
+      "docs": null,
+      "endpoint": null,
+      "group": "people",
+      "methods": [
+        {"type": "searchString", "title": "Поиск банкротств", "price_rub": 0.6},
+        {"type": "search", "title": "Карточка дела", "price_rub": 0.6},
+        {"type": "regionsList", "title": "Регионы", "price_rub": 0.0}
+      ]
+    },
+    {
+      "id": "dover",
+      "name": "ФНП доверенности",
+      "docs": null,
+      "endpoint": null,
+      "group": "people",
+      "methods": [
+        {"type": "search", "title": "Проверка доверенности", "price_rub": 0.5},
+        {"type": "revocations", "title": "Простая письменная / отзыв", "price_rub": 0.3},
+        {"type": "search_notary_id", "title": "id нотариуса", "price_rub": 0.1}
+      ]
+    },
+    {
+      "id": "rospotrebnadzor",
+      "name": "Роспотребнадзор",
+      "docs": null,
+      "endpoint": null,
+      "group": "people",
+      "methods": [
+        {"type": "elmk_registry", "title": "Эл. медкнижка", "price_rub": 0.3}
+      ]
+    },
+    {
+      "id": "pb_nalog",
+      "name": "ФНС Прозрачный бизнес",
+      "docs": "https://api-cloud.ru/pb_nalog",
+      "endpoint": null,
+      "group": "business",
+      "methods": [
+        {"type": "search_ip", "title": "Поиск ИП", "price_rub": 0.3},
+        {"type": "search_org", "title": "Поиск ЮЛ", "price_rub": 0.3},
+        {"type": "search_upr_uchr", "title": "Участие в ЮЛ", "price_rub": 0.45}
+      ]
+    },
+    {
+      "id": "rosreestr",
+      "name": "Росреестр",
+      "docs": null,
+      "endpoint": null,
+      "group": "business",
+      "methods": [
+        {"type": "cadastr", "title": "Кадастр по адресу", "price_rub": 0.35},
+        {"type": "object", "title": "Объект по кадастру", "price_rub": 0.35},
+        {"type": "pkk", "title": "ПКК", "price_rub": 0.5}
+      ]
+    },
+    {
+      "id": "ras_arbitr",
+      "name": "ras.arbitr",
+      "docs": null,
+      "endpoint": null,
+      "group": "business",
+      "methods": [
+        {"type": "search", "title": "Решения арбитража", "price_rub": 0.5}
+      ]
+    },
+    {
+      "id": "kad_arbitr",
+      "name": "kad.arbitr",
+      "docs": null,
+      "endpoint": null,
+      "group": "business",
+      "methods": [
+        {"type": "search", "title": "Поиск дел", "price_rub": 0.5},
+        {"type": "caseInfo", "title": "Карточка дела", "price_rub": 0.5}
+      ]
+    },
+    {
+      "id": "gas_rf",
+      "name": "ГАС Правосудие",
+      "docs": null,
+      "endpoint": null,
+      "group": "business",
+      "methods": [
+        {"type": "case", "title": "Дело на сайте суда", "price_rub": 0.45}
+      ]
+    },
+    {
+      "id": "sudmos",
+      "name": "Суды общей юрисдикции Москвы",
+      "docs": null,
+      "endpoint": null,
+      "group": "business",
+      "methods": [
+        {"type": "getValuesForFields", "title": "Справочник полей", "price_rub": 0.2},
+        {"type": "caseSearch", "title": "Поиск дел", "price_rub": 0.45},
+        {"type": "caseDetail", "title": "Детали дела", "price_rub": 0.45}
+      ]
+    },
+    {
+      "id": "minec",
+      "name": "Минэкономразвития",
+      "docs": null,
+      "endpoint": null,
+      "group": "business",
+      "methods": [
+        {"type": "guide", "title": "Инструкторы-проводники / гиды", "price_rub": 0.3},
+        {"type": "tour", "title": "Туроператоры / турагенты", "price_rub": 0.3}
+      ]
+    }
+  ]
+}
