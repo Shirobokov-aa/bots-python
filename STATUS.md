@@ -15,6 +15,8 @@
 - [ ] #7 Reels — на потом. → commit: позже
 
 ## Сделано
+### 2026-09-29
+- **api-cloud: ГИБДД недоступен.** Support: «ГИБДД не работает, остальное ок». Этап 1 → гибрид (облако + ru-api на ГИБДД). → commit: `docs(api-cloud): gibdd unavailable hybrid plan`
 ### 2026-09-28
 - **#52 этап 1 = автовладелец.** `scenarios.md`: P0 fines/preview/report; этап 2+ отложен. Ideals #52 → api-cloud. → commit: `docs(api-cloud): stage1 auto-owner scenarios`
 - **Заявка ФЛ api-cloud.** Черновик письма `api-cloud.ru/reg-request-fl.md` (support + API этапа 1). → commit: `docs(api-cloud): fl registration email draft`
